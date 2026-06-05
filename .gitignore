@@ -3,3 +3,9 @@
 *.swp
 
 *.swo
+
+.venv/
+*.csv
+
+__pycache__/
+*.pyc
