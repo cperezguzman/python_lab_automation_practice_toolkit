@@ -5,6 +5,7 @@ import csv
 from pathlib import Path
 import time
 import random
+import matplotlib.pyplot as plt
 
 class MockSourcemeter:
     NOISE_FRAC = {"LOW" : 0.001, "MEDIUM" : 0.009, "HIGH" : 0.02}
@@ -121,6 +122,23 @@ def save_to_csv(data: list[dict], filepath: str | Path) -> None:
         writer.writeheader()
         writer.writerows(data)
 
+def plot_fig(data: list[dict], filepath: str | Path) -> None:
+    
+    voltages = [row["measured_voltage"] for row in data]
+    currents = [row["measured_current"] for row in data]
+
+    plt.figure(figsize=(8, 5))
+    plt.plot(voltages, currents, marker="o", markersize=3, linewidth=1)
+
+    plt.xlabel("Voltage (V)")
+    plt.ylabel("Current (A)")
+    plt.title("I-V Sweep")
+    plt.grid(True)
+
+    Path(filepath).parent.mkdir(parents=True, exist_ok=True)
+    plt.savefig(filepath, dpi=150, bbox_inches="tight")
+    plt.show()
+    plt.close()
 
 def main():
     sourcemeter1 = MockSourcemeter()
@@ -135,7 +153,7 @@ def main():
         data = []
 
         v_range = sourcemeter1.get_voltage_range()
-        shots = sourcemeter1.get_shots()
+        shots = sourcemeter1.get_shots()    
         voltages = np.linspace(-v_range, v_range, shots)
 
         print("Commencing measurement process.")
@@ -156,6 +174,8 @@ def main():
 
         save_to_csv(data, "iv_sweep_results.csv")
         print("Saved to CSV file.")
+
+        plot_fig(data, "iv_sweep_results_graph.png")
     
     except RuntimeError as e:
         print(f"Sweep aborted: {e}")
