@@ -115,8 +115,8 @@ def save_to_csv(data: list[dict], filepath: str | Path) -> None:
         return # nothing to write
 
     fieldnames = list(data[0].keys())
-    
 
+    Path(filepath).parent.mkdir(parents=True, exist_ok=True)
     with open(filepath, "w", newline="") as f:
         writer = csv.DictWriter(f, fieldnames=fieldnames)
         writer.writeheader()
@@ -137,7 +137,6 @@ def plot_fig(data: list[dict], filepath: str | Path) -> None:
 
     Path(filepath).parent.mkdir(parents=True, exist_ok=True)
     plt.savefig(filepath, dpi=150, bbox_inches="tight")
-    plt.show()
     plt.close()
 
 def main():
@@ -172,10 +171,11 @@ def main():
                 "measured_current": current,
             })
 
-        save_to_csv(data, "iv_sweep_results.csv")
+        save_to_csv(data, "data/raw/iv_sweep_results.csv")
         print("Saved to CSV file.")
 
-        plot_fig(data, "iv_sweep_results_graph.png")
+        plot_fig(data, "plots/iv/iv_sweep_results_graph.png") # TODO: ADD TIMESTAMP TO EACH RUN SAVED
+        print("Saved plot to PNG file.")
     
     except RuntimeError as e:
         print(f"Sweep aborted: {e}")
