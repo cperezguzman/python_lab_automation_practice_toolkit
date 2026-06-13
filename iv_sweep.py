@@ -6,6 +6,7 @@ from pathlib import Path
 import time
 import random
 import matplotlib.pyplot as plt
+from datetime import datetime
 
 class MockSourcemeter:
     NOISE_FRAC = {"LOW" : 0.001, "MEDIUM" : 0.009, "HIGH" : 0.02}
@@ -53,10 +54,10 @@ class MockSourcemeter:
     def get_current_limit(self):
         return self.current_limit
 
-    def set_resistance(self, ohms: float):
+    def set_simulated_resistance(self, ohms: float):
         self.simulated_resistance = ohms
 
-    def get_resistance(self):
+    def get_simulated_resistance(self):
         return self.simulated_resistance
 
     def set_noise_level(self, level: str):
@@ -100,7 +101,7 @@ class MockSourcemeter:
         if self.output_status == "DISABLED":
             raise RuntimeError("Cannot measure current: instrument output is disabled.")
 
-        ideal_current = (self.get_voltage() / self.get_resistance())
+        ideal_current = (self.get_voltage() / self.get_simulated_resistance())
 
         if abs(ideal_current) > self.get_current_limit():
             raise RuntimeError("Current limit exceeded.")
@@ -108,6 +109,19 @@ class MockSourcemeter:
         noise = self.get_noise("CURRENT", ideal_current)
         
         return ideal_current + noise
+
+
+def calculate_resistance(data: list[dict]) -> float:
+    """Estimate resistance (ohms) from I-V data via linear fit: V = R * I."""
+    if not data:
+        raise ValueError("Cannot estimate resistance: no measurement data.")
+
+    voltages = np.array([row["measured_voltage"] for row in data])
+    currents = np.array([row["measured_current"] for row in data])
+
+    # Slope of V vs I equals R for an ohmic device (more stable than averaging V/I).
+    resistance, _ = np.polyfit(currents, voltages, 1)
+    return resistance
 
 
 def save_to_csv(data: list[dict], filepath: str | Path) -> None:
@@ -171,11 +185,17 @@ def main():
                 "measured_current": current,
             })
 
-        save_to_csv(data, "data/raw/iv_sweep_results.csv")
-        print("Saved to CSV file.")
+        timestamp = datetime.now().strftime("%Y-%m-%d_%H%M%S")
+        csvfile = f"data/raw/iv_sweep_{timestamp}.csv"
+        pltfile = f"plots/iv/iv_sweep_{timestamp}.png"
 
-        plot_fig(data, "plots/iv/iv_sweep_results_graph.png") # TODO: ADD TIMESTAMP TO EACH RUN SAVED
-        print("Saved plot to PNG file.")
+        save_to_csv(data, csvfile)
+        print(f"Saved data to {csvfile}.")
+
+        plot_fig(data, pltfile)
+        print(f"Saved plot to {pltfile}.")
+
+        print(f"Estimated resistance: {calculate_resistance(data):.2f} ohms")
     
     except RuntimeError as e:
         print(f"Sweep aborted: {e}")
