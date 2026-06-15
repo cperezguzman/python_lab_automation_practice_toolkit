@@ -13,9 +13,11 @@ The instruments are simulated. The goal is to demonstrate measurement procedure,
 - Mock sourcemeter with connect/disconnect, output enable/disable, and safety checks
 - Automated I-V sweep over a configurable voltage range
 - Gaussian noise model with LOW / MEDIUM / HIGH levels
-- CSV data logging
+- Timestamped CSV data logging
 - Automatic I-V plot generation with matplotlib
+- Resistance estimation from I-V slope
 - Safe instrument shutdown using `try` / `finally`
+- Modular project layout under `src/`
 
 ## Installation
 
@@ -35,27 +37,29 @@ On Ubuntu/Debian, if `pip install` fails with an `externally-managed-environment
 
 ## Usage
 
-With the virtual environment activated:
+With the virtual environment activated, from the project root:
 
 ```bash
-python iv_sweep.py
+python src/main.py --experiment iv
 ```
 
 Expected terminal output:
 
 ```text
+Starting I-V sweep...
 Connected to sourcemeter.
 Enabled sourcemeter output.
 Commencing measurement process.
-Saved to CSV file.
-Saved plot to PNG file.
+Data saved to data/raw/iv_sweep_2026-05-20_150214.csv
+Plot saved to plots/iv/iv_sweep_2026-05-20_150214.png
+Estimated resistance: 50.09 ohms
 Successfully disabled and disconnected the sourcemeter.
 ```
 
-**Outputs:**
+**Outputs** (timestamped, generated at runtime):
 
-- `data/raw/iv_sweep_results.csv` — voltage and current measurements
-- `plots/iv/iv_sweep_results_graph.png` — I-V curve plot
+- `data/raw/iv_sweep_<timestamp>.csv`
+- `plots/iv/iv_sweep_<timestamp>.png`
 
 ## Example Output
 
@@ -65,26 +69,36 @@ Successfully disabled and disconnected the sourcemeter.
 
 ```text
 python_lab_automation_practice_toolkit/
-├── iv_sweep.py              # Mock sourcemeter, sweep, CSV export, plotting
+├── src/
+│   ├── main.py                    # CLI entry point
+│   ├── instruments/
+│   │   ├── base_instrument.py
+│   │   └── mock_sourcemeter.py
+│   ├── experiments/
+│   │   └── iv_sweep.py            # I-V measurement procedure
+│   ├── analysis/
+│   │   └── iv_analysis.py         # Resistance estimation
+│   ├── plotting/
+│   │   └── plot_iv.py
+│   └── utils/
+│       └── file_manager.py        # CSV save, timestamped paths
 ├── requirements.txt
 ├── README.md
-├── data/raw/                # CSV output (generated at runtime)
-├── plots/iv/                # Plot output (generated at runtime)
-└── examples/screenshots/    # Example plot for documentation
+├── data/raw/                      # CSV output (gitignored)
+├── plots/iv/                      # Plot output (gitignored)
+└── examples/screenshots/          # Example plot for documentation
 ```
 
 ## Technologies
 
 - Python 3
-- NumPy — voltage sweep arrays
+- NumPy — voltage sweep arrays and linear fit
 - Matplotlib — I-V plotting
 - CSV (stdlib) — data logging
 
 ## Future Improvements
 
-- Timestamped output filenames
 - JSON configuration files for sweep parameters
-- Modular package layout (`src/instruments/`, `src/experiments/`, etc.)
 - Resonance sweep experiment
-- Resistance estimation from I-V slope
 - Unit tests
+- Mock vs real instrument mode (PyVISA)
