@@ -1,0 +1,9 @@
+{
+  "start_frequency_ghz": 4.8,
+  "stop_frequency_ghz": 5.2,
+  "num_points": 401,
+  "resonance_frequency_ghz": 5.0,
+  "linewidth_ghz": 0.025,
+  "noise_std": 0.01,
+  "dip_depth": 0.7
+}

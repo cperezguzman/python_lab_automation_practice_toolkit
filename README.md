@@ -1,20 +1,22 @@
 # Python Lab Automation Practice Toolkit
 
-A Python toolkit that simulates instrument-controlled I-V sweep measurements using a mock sourcemeter.
+A Python toolkit that simulates instrument-controlled I-V and resonance sweep measurements using mock lab instruments.
 
 ## Overview
 
-This project simulates lab automation workflows commonly used in electronics testing and hardware characterization. It uses a **mock sourcemeter** (no real hardware required) to sweep voltage, measure current using Ohm's law with added noise, save results to CSV, and generate an I-V plot.
+This project simulates lab automation workflows commonly used in electronics testing, microwave resonator characterization, and hardware labs. It uses **mock instruments** (no real hardware required) to run automated measurements, save timestamped CSV data, generate plots, and perform basic analysis.
 
-The instruments are simulated. The goal is to demonstrate measurement procedure, data handling, and plotting in a structure that could later connect to real instruments (for example via PyVISA).
+The instruments are simulated. The goal is to demonstrate measurement procedure, data handling, plotting, and analysis in a structure that could later connect to real instruments (for example via PyVISA).
 
 ## Features
 
 - Mock sourcemeter with connect/disconnect, output enable/disable, and safety checks
-- Automated I-V sweep over a configurable voltage range
-- Gaussian noise model with LOW / MEDIUM / HIGH levels
+- Mock network analyzer for simulated resonance sweeps
+- Automated I-V sweep with configurable voltage range and resistance model
+- Resonance sweep with Lorentzian dip, noise, curve fitting, and Q-factor estimation
+- JSON configuration files for experiment parameters
 - Timestamped CSV data logging
-- Automatic I-V plot generation with matplotlib
+- Automatic plot generation with matplotlib
 - Resistance estimation from I-V slope
 - Safe instrument shutdown using `try` / `finally`
 - Modular project layout under `src/`
@@ -40,10 +42,18 @@ On Ubuntu/Debian, if `pip install` fails with an `externally-managed-environment
 With the virtual environment activated, from the project root:
 
 ```bash
+# I-V sweep (default config)
 python src/main.py --experiment iv
+
+# Resonance sweep (default config)
+python src/main.py --experiment resonance
+
+# Custom config file
+python src/main.py --experiment iv --config config/iv_sweep_config.json
+python src/main.py --experiment resonance --config config/resonance_sweep_config.json
 ```
 
-Expected terminal output:
+### I-V sweep output
 
 ```text
 Starting I-V sweep...
@@ -56,49 +66,99 @@ Estimated resistance: 50.09 ohms
 Successfully disabled and disconnected the sourcemeter.
 ```
 
-**Outputs** (timestamped, generated at runtime):
+### Resonance sweep output
 
-- `data/raw/iv_sweep_<timestamp>.csv`
-- `plots/iv/iv_sweep_<timestamp>.png`
+```text
+Starting resonance sweep...
+Connected to MockNetworkAnalyzer.
+Sweeping 4.8 GHz to 5.2 GHz...
+Sweep complete.
+Data saved to data/raw/resonance_sweep_2026-05-20_152240.csv
+Plot saved to plots/resonance/resonance_sweep_2026-05-20_152240.png
+Estimated resonance frequency: 5.0001 GHz
+Estimated linewidth: 0.0248 GHz
+Estimated Q: 201.4
+Disconnected from MockNetworkAnalyzer.
+```
+
+## Configuration
+
+Experiment parameters are stored in JSON files under `config/`:
+
+**`config/iv_sweep_config.json`**
+
+```json
+{
+  "start_voltage": -10.0,
+  "stop_voltage": 10.0,
+  "num_points": 25,
+  "resistance_ohms": 50,
+  "noise_level": "MEDIUM",
+  "settling_time_seconds": 0.1
+}
+```
+
+**`config/resonance_sweep_config.json`**
+
+```json
+{
+  "start_frequency_ghz": 4.8,
+  "stop_frequency_ghz": 5.2,
+  "num_points": 401,
+  "resonance_frequency_ghz": 5.0,
+  "linewidth_ghz": 0.025,
+  "noise_std": 0.01,
+  "dip_depth": 0.7
+}
+```
+
+Edit these files to change sweep parameters without modifying Python code.
 
 ## Example Output
 
 ![I-V sweep plot](examples/screenshots/iv_sweep.png)
 
+![Resonance sweep plot](examples/screenshots/resonance_sweep.png)
+
 ## Project Structure
 
 ```text
 python_lab_automation_practice_toolkit/
+├── config/
+│   ├── iv_sweep_config.json
+│   └── resonance_sweep_config.json
 ├── src/
-│   ├── main.py                    # CLI entry point
+│   ├── main.py
 │   ├── instruments/
-│   │   ├── base_instrument.py
-│   │   └── mock_sourcemeter.py
+│   │   ├── mock_sourcemeter.py
+│   │   └── mock_network_analyzer.py
 │   ├── experiments/
-│   │   └── iv_sweep.py            # I-V measurement procedure
+│   │   ├── iv_sweep.py
+│   │   └── resonance_sweep.py
 │   ├── analysis/
-│   │   └── iv_analysis.py         # Resistance estimation
+│   │   ├── iv_analysis.py
+│   │   └── resonance_analysis.py
 │   ├── plotting/
-│   │   └── plot_iv.py
+│   │   ├── plot_iv.py
+│   │   └── plot_resonance.py
 │   └── utils/
-│       └── file_manager.py        # CSV save, timestamped paths
-├── requirements.txt
-├── README.md
+│       ├── config_loader.py
+│       └── file_manager.py
 ├── data/raw/                      # CSV output (gitignored)
-├── plots/iv/                      # Plot output (gitignored)
-└── examples/screenshots/          # Example plot for documentation
+├── plots/                         # Plot output (gitignored)
+└── examples/screenshots/
 ```
 
 ## Technologies
 
 - Python 3
-- NumPy — voltage sweep arrays and linear fit
-- Matplotlib — I-V plotting
-- CSV (stdlib) — data logging
+- NumPy — sweep arrays and linear algebra
+- Matplotlib — plotting
+- SciPy — Lorentzian curve fitting for resonance analysis
+- JSON — experiment configuration
 
 ## Future Improvements
 
-- JSON configuration files for sweep parameters
-- Resonance sweep experiment
 - Unit tests
 - Mock vs real instrument mode (PyVISA)
+- Streamlit dashboard or live plotting

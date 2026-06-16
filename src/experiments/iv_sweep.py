@@ -9,11 +9,20 @@ from utils.file_manager import make_iv_sweep_paths, save_to_csv
 
 
 def run_iv_sweep(
+    config: dict,
     sourcemeter: MockSourcemeter | None = None,
-    settling_time: float = 0.1,
 ) -> dict:
     """Run a full I-V sweep: measure, save CSV, plot, and estimate resistance."""
-    sourcemeter = sourcemeter or MockSourcemeter()
+    sourcemeter = sourcemeter or MockSourcemeter(
+        simulated_resistance=config["resistance_ohms"],
+        noise_level=config.get("noise_level", "MEDIUM"),
+        shots=config["num_points"],
+    )
+    sourcemeter.set_voltage_range(
+        max(abs(config["start_voltage"]), abs(config["stop_voltage"]))
+    )
+
+    settling_time = config.get("settling_time_seconds", 0.1)
 
     sourcemeter.connect()
     print("Connected to sourcemeter.")
@@ -23,9 +32,11 @@ def run_iv_sweep(
 
     try:
         data = []
-        v_range = sourcemeter.get_voltage_range()
-        shots = sourcemeter.get_shots()
-        voltages = np.linspace(-v_range, v_range, shots)
+        voltages = np.linspace(
+            config["start_voltage"],
+            config["stop_voltage"],
+            config["num_points"],
+        )
 
         print("Commencing measurement process.")
 

@@ -15,6 +15,14 @@ def make_iv_sweep_paths(timestamp: str | None = None) -> tuple[Path, Path]:
     return csv_path, plot_path
 
 
+def make_resonance_sweep_paths(timestamp: str | None = None) -> tuple[Path, Path]:
+    if timestamp is None:
+        timestamp = make_timestamp()
+    csv_path = Path(f"data/raw/resonance_sweep_{timestamp}.csv")
+    plot_path = Path(f"plots/resonance/resonance_sweep_{timestamp}.png")
+    return csv_path, plot_path
+
+
 def save_to_csv(data: list[dict], filepath: str | Path) -> None:
     if not data:
         return
