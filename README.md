@@ -187,13 +187,6 @@ python_lab_automation_practice_toolkit/
 - JSON — experiment configuration
 - pytest — automated tests
 
-## Resume bullets
-
-- Built a Python lab automation toolkit with mock sourcemeter and network analyzer classes for I-V and resonance characterization workflows.
-- Implemented JSON-driven experiments with timestamped CSV logging, matplotlib plots, linear resistance estimation, and Lorentzian curve fitting with Q-factor extraction.
-- Organized code into layered modules (instruments, experiments, analysis, plotting, utils) with abstract instrument interfaces for future PyVISA integration.
-- Added pytest coverage and GitHub Actions CI for file I/O, instrument safety checks, sweep output validation, and resonance analysis.
-
 ## Future Improvements
 
 - Mock vs real instrument mode (PyVISA)
