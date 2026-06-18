@@ -30,3 +30,8 @@ jobs:
         env:
           MPLBACKEND: Agg
         run: python src/main.py --experiment iv --config examples/example_iv_config.json
+
+      - name: Smoke test resonance experiment
+        env:
+          MPLBACKEND: Agg
+        run: python src/main.py --experiment resonance --config examples/example_resonance_config.json
