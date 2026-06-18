@@ -102,3 +102,15 @@ class MockSourcemeter(BaseInstrument):
 
         noise = self.get_noise("CURRENT", ideal_current)
         return ideal_current + noise
+
+    @classmethod
+    def from_config(cls, config: dict) -> "MockSourcemeter":
+        sourcemeter = cls(
+            simulated_resistance=config["resistance_ohms"],
+            noise_level=config.get("noise_level", "MEDIUM"),
+            shots=config["num_points"],
+        )
+        sourcemeter.set_voltage_range(
+            max(abs(config["start_voltage"]), abs(config["stop_voltage"]))
+        )
+        return sourcemeter

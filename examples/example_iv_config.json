@@ -1,0 +1,8 @@
+{
+  "start_voltage": -10.0,
+  "stop_voltage": 10.0,
+  "num_points": 25,
+  "resistance_ohms": 50,
+  "noise_level": "MEDIUM",
+  "settling_time_seconds": 0.1
+}

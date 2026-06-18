@@ -20,6 +20,8 @@ The instruments are simulated. The goal is to demonstrate measurement procedure,
 - Resistance estimation from I-V slope
 - Safe instrument shutdown using `try` / `finally`
 - Modular project layout under `src/`
+- `MockSourcemeter.from_config()` for JSON-driven instrument setup
+- pytest test suite and GitHub Actions CI
 
 ## Installation
 
@@ -81,6 +83,27 @@ Estimated Q: 201.4
 Disconnected from MockNetworkAnalyzer.
 ```
 
+## Testing
+
+With the virtual environment activated:
+
+```bash
+pytest
+```
+
+The test suite covers CSV/timestamp utilities, mock sourcemeter safety and Ohm's-law behavior, config loading, I-V sweep output length, and Lorentzian resonance fitting.
+
+## Example configs
+
+Reference copies for documentation and custom runs:
+
+- `examples/example_iv_config.json`
+- `examples/example_resonance_config.json`
+
+```bash
+python src/main.py --experiment iv --config examples/example_iv_config.json
+```
+
 ## Configuration
 
 Experiment parameters are stored in JSON files under `config/`:
@@ -124,9 +147,15 @@ Edit these files to change sweep parameters without modifying Python code.
 
 ```text
 python_lab_automation_practice_toolkit/
+├── .github/workflows/ci.yml
 ├── config/
 │   ├── iv_sweep_config.json
 │   └── resonance_sweep_config.json
+├── examples/
+│   ├── example_iv_config.json
+│   ├── example_resonance_config.json
+│   └── screenshots/
+├── tests/
 ├── src/
 │   ├── main.py
 │   ├── instruments/
@@ -156,9 +185,18 @@ python_lab_automation_practice_toolkit/
 - Matplotlib — plotting
 - SciPy — Lorentzian curve fitting for resonance analysis
 - JSON — experiment configuration
+- pytest — automated tests
+
+## Resume bullets
+
+- Built a Python lab automation toolkit with mock sourcemeter and network analyzer classes for I-V and resonance characterization workflows.
+- Implemented JSON-driven experiments with timestamped CSV logging, matplotlib plots, linear resistance estimation, and Lorentzian curve fitting with Q-factor extraction.
+- Organized code into layered modules (instruments, experiments, analysis, plotting, utils) with abstract instrument interfaces for future PyVISA integration.
+- Added pytest coverage and GitHub Actions CI for file I/O, instrument safety checks, sweep output validation, and resonance analysis.
 
 ## Future Improvements
 
-- Unit tests
 - Mock vs real instrument mode (PyVISA)
+- Config schema validation (pydantic/jsonschema)
+- Structured logging
 - Streamlit dashboard or live plotting

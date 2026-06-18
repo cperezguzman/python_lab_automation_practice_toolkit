@@ -13,14 +13,7 @@ def run_iv_sweep(
     sourcemeter: MockSourcemeter | None = None,
 ) -> dict:
     """Run a full I-V sweep: measure, save CSV, plot, and estimate resistance."""
-    sourcemeter = sourcemeter or MockSourcemeter(
-        simulated_resistance=config["resistance_ohms"],
-        noise_level=config.get("noise_level", "MEDIUM"),
-        shots=config["num_points"],
-    )
-    sourcemeter.set_voltage_range(
-        max(abs(config["start_voltage"]), abs(config["stop_voltage"]))
-    )
+    sourcemeter = sourcemeter or MockSourcemeter.from_config(config)
 
     settling_time = config.get("settling_time_seconds", 0.1)
 
